@@ -11,6 +11,8 @@
     "url": "https://github.com/epritchard"
   },
   "dependencies": {
+    "csv-parse": "0.0.6",
+    "prompt": "^0.2.14",
     "request": "^2.51.0"
   },
   "devDependencies": {},

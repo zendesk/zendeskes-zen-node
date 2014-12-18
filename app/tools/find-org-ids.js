@@ -4,7 +4,6 @@ var prompt = require('prompt');
 var request = require('request');
 var underscore = require('underscore');
 var json2csv = require('nice-json2csv');
-var Bottleneck = require("bottleneck");
 
 // Set global variables
 var page = 1;
@@ -72,21 +71,23 @@ function onErr(err) {
     console.log("There was a problem.\n", err);
 }
 
+
+
 function getOrgs(credentials, subdomain, csvFile) {
     console.log("Getting page " + page + "...");
 
     request.get('https://' + credentials + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
         if (!error && response.statusCode == 200) {
-            var result = JSON.parse(body);
+            var data = JSON.parse(body);
 
-            underscore._.each(result.organizations, function(value) {
+            underscore._.each(data.organizations, function(value) {
                 organizations.push({"name":value.name, "id":value.id, "url":value.url});
                 orgCount++;
             });
 
-            if (result.next_page !== null) {
+            if (data.next_page !== null) {
                 page++;
-                getOrgs(credentials, subdomain, csvFile);
+                setTimeout(getOrgs(credentials, subdomain, csvFile), 2000);
             } else {
                 console.log("Done fetching pages...\n");
                 console.log("RESULTS - Showing " + orgCount + " organizations");
@@ -96,7 +97,7 @@ function getOrgs(credentials, subdomain, csvFile) {
 
         } else if (response.statusCode == 429) {
             setTimeout(getOrgs(credentials, subdomain, csvFile), response["Retry-After"]);
-            getOrgs();
+            getOrgs(credentials, result.subdomain, csvFile);
 
         } else {
             console.log(response.statusCode);

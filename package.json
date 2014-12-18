@@ -13,6 +13,7 @@
   "dependencies": {
     "bottleneck": "^1.5.3",
     "csvtojson": "^0.3.17",
+    "fs-extra": "^0.13.0",
     "lazy": "^1.0.11",
     "mkpath": "^0.1.0",
     "nice-json2csv": "^0.2.0",

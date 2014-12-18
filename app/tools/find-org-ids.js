@@ -1,16 +1,18 @@
+// Dependencies
+var fs = require('fs-extra');
 var prompt = require('prompt');
 var request = require('request');
 var underscore = require('underscore');
-var fs = require('fs');
-var touch = require('touch');
 var json2csv = require('nice-json2csv');
 var Bottleneck = require("bottleneck");
 
-var path = '/api/v2/help_center/oragnizations.json'        // Targets the organizations.json endpoint
-var auth, subdomain, organizations = [], page = 1;
-touch(__dirname + '/data-sets/tmp/organizations.csv');
+// Set global variables
+var page = 1;
+var organizations = [];
+var orgCount = 0;
 
-var properties = [
+// Get authentication properties and export filename
+var authProperties = [
     {
         name: 'tokenaccess',
         description: 'Will you be using token access (y/n)',
@@ -33,59 +35,73 @@ var properties = [
         name: 'subdomain',
         description: 'Enter your Zendesk subdomain',
         required: true
+    },
+    {
+        name: 'exportFile',
+        description: 'Enter a filename to export the CSV to',
+        required: true
     }
 ];
 
 prompt.start();
 
-prompt.get(properties, function (err, result) {
+prompt.get(authProperties, function (err, result) {
     if (err) {
         return onErr(err);
     } else {
+
+        // Check to see if exportFile exists, and if not create it
+        var csvFile = 'tmp/org-ids/' + result.exportFile + '.csv';
+
+        var credentials;
+
+        // Create credentials from user input and pass on to getOrgs()
         if (result.tokenaccess.toLowerCase() === 'n') {
-            auth = result.username + ':' + encodeURIComponent(result.password) + '@';
+            credentials = result.username + ':' + encodeURIComponent(result.password) + '@';
         } else {
-            auth = result.username + encodeURIComponent('/token') + ':' + result.password + '@';
+            credentials = result.username + encodeURIComponent('/token') + ':' + result.password + '@';
         }
 
-        subdomain = result.subdomain;
+        getOrgs(credentials, result.subdomain, csvFile);
 
-        return getOrgs();
     }
 
-})
+});
 
 function onErr(err) {
     console.log("There was a problem.\n", err);
 }
 
-function getOrgs() {
+function getOrgs(credentials, subdomain, csvFile) {
+    console.log("Getting page " + page + "...");
 
-    request.get('https://' + auth + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
-        if (!error && response.statusCode == 200) {;
+    request.get('https://' + credentials + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
+        if (!error && response.statusCode == 200) {
             var result = JSON.parse(body);
 
-            underscore._.map(result["organizations"], function(value) {
+            underscore._.each(result.organizations, function(value) {
                 organizations.push({"name":value.name, "id":value.id, "url":value.url});
-            })
+                orgCount++;
+            });
 
-            console.log(JSON.stringify(organizations));
-
-            if (result["next_page"] != null) {
+            if (result.next_page !== null) {
                 page++;
-                getOrgs();
+                getOrgs(credentials, subdomain, csvFile);
             } else {
-                console.log("...done");
-                var csvData = JSON.parse(organizations);
-                return json2csv.convert();
+                console.log("Done fetching pages...\n");
+                console.log("RESULTS - Showing " + orgCount + " organizations");
+                console.log("=====================================================\n\n");
+                console.log(JSON.stringify(organizations));
             }
 
         } else if (response.statusCode == 429) {
-            setTimeout(getOrgs(), response["Retry-After"]);
+            setTimeout(getOrgs(credentials, subdomain, csvFile), response["Retry-After"]);
+            getOrgs();
 
         } else {
-            console.log(error);
             console.log(response.statusCode);
+            console.log(response.body);
+            return error;
         }
-    }).pipe(fs.createWriteStream(__dirname + '/data-sets/tmp/organizations.csv'));
+    });
 }

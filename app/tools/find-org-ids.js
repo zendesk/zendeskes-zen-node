@@ -93,6 +93,15 @@ function getOrgs(credentials, subdomain, csvFile) {
                 console.log("RESULTS - Showing " + orgCount + " organizations");
                 console.log("=====================================================\n\n");
                 console.log(JSON.stringify(organizations));
+                var csvContent = json2csv.convert(organizations);
+
+                console.log("CSV VALUES");
+                console.log("=====================================================\n\n");
+                console.log(csvContent);
+                fs.writeFile(csvFile, csvContent, function (err){
+                    if (err) return console.log(err);
+                    console.log("Saved CSV...");
+                });
             }
 
         } else if (response.statusCode == 429) {

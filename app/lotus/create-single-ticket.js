@@ -1,11 +1,11 @@
 // Create a single ticket using node.js
 
-var request = require('request');                       // Require the Request package: https://www.npmjs.com/package/request
+var request = require('request');
 var username = '###';                                   // Replace with your username
 var password = '###';                                   // Replace with your password
-var domain = '###.zendesk.com'                          // Replace with your Zendesk domain
-var path = '/api/v2/tickets.json'                       // Targets the categories.json endpoint
-var auth = username + ':' + password + '@';             // Builds basic authorization string
+var domain = '###.zendesk.com';                         // Replace with your Zendesk domain
+var path = '/api/v2/tickets.json';
+var auth = username + ':' + password + '@';
 
 
 // Ticket information
@@ -28,4 +28,4 @@ request({
             return console.error('Failed request: ', error);
         }
         console.log('Successful request! Server response: ', body);
-    })
+    });

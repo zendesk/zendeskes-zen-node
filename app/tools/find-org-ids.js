@@ -5,6 +5,10 @@ var request = require('request');
 var underscore = require('underscore');
 var json2csv = require('nice-json2csv');
 
+// Set prompt appearance
+prompt.message = '> '.green;
+prompt.delimiter = '';
+
 // Set global variables
 var page = 1;
 var organizations = [];
@@ -14,30 +18,30 @@ var orgCount = 0;
 var authProperties = [
     {
         name: 'tokenaccess',
-        description: 'Will you be using token access (y/n)',
+        description: 'Will you be using token access (y/n):'.green,
         pattern: /^[YNyn]{1}$/,
         message: 'You must enter \'y\' or \'n\'',
         required: true
     },
     {
         name: 'username',
-        description: 'Enter your username for Zendesk',
+        description: 'Enter your username for Zendesk:'.green,
         required: true
     },
     {
         name: 'password',
-        description: 'Enter your password or API token',
+        description: 'Enter your password or API token:'.green,
         hidden: true,
         required: true
     },
     {
         name: 'subdomain',
-        description: 'Enter your Zendesk subdomain',
+        description: 'Enter your Zendesk subdomain:'.green,
         required: true
     },
     {
         name: 'exportFile',
-        description: 'Enter a filename to export the CSV to',
+        description: 'Enter a filename to export the CSV to:'.green,
         required: true
     }
 ];

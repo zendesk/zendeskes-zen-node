@@ -12,7 +12,6 @@ prompt.delimiter = '';
 // Set global variables
 var page = 1;
 var orgs = [];
-var orgCount = 0;
 
 // Get authentication properties and export filename
 var authProperties = [
@@ -86,7 +85,6 @@ function getOrgs(credentials, subdomain, csvFile) {
 
             underscore._.each(data.organizations, function(value) {
                 orgs.push({"name":value.name, "id":value.id, "url":value.url});
-                // orgCount++;
             });
 
             if (data.next_page !== null) {

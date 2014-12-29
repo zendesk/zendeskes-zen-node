@@ -55,17 +55,17 @@ prompt.get(authProperties, function (err, result) {
         // Check to see if exportFile exists, and if not create it
         var csvFile = 'tmp/org-ids/' + result.exportFile + '.csv';
 
-        var credentials;
-
         // Create credentials from user input and pass on to getOrgs()
+        var username = '';
+
         if (result.tokenaccess.toLowerCase() === 'n') {
-            credentials = result.username + ':' + encodeURIComponent(result.password) + '@';
+            username = result.username;
         } else {
-            credentials = result.username + encodeURIComponent('/token') + ':' + result.password + '@';
+            username = result.username + '/token';
         }
 
-        getOrgs(credentials, result.subdomain, csvFile);
-
+        console.log("\n"); // Make space for request processing in console
+        getOrgs(username, result.password, result.subdomain, csvFile);
     }
 
 });
@@ -76,10 +76,10 @@ function onErr(err) {
 
 
 
-function getOrgs(credentials, subdomain, csvFile) {
+function getOrgs(username, password, subdomain, csvFile) {
     console.log("Getting page " + page + "...");
 
-    request.get('https://' + credentials + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
+    request.get('https://' + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var data = JSON.parse(body);
 
@@ -89,13 +89,13 @@ function getOrgs(credentials, subdomain, csvFile) {
 
             if (data.next_page !== null) {
                 page++;
-                setTimeout(getOrgs(credentials, subdomain, csvFile), 2000);
+                setTimeout(getOrgs(username, password, subdomain, csvFile), 2000);
             } else {
                 var csvContent = json2csv.convert(orgs);
 
-                console.log("Done fetching pages...\n");
+                console.log("Done fetching pages.\n");
                 console.log("RESULTS - Showing " + orgs.length + " organizations");
-                console.log("=====================================================\n\n");
+                console.log("==================================\n\n");
                 console.log(csvContent);
                 /*fs.writeFile(csvFile, csvContent, function (err){
                     if (err) return console.log(err);
@@ -112,5 +112,5 @@ function getOrgs(credentials, subdomain, csvFile) {
             console.log(response.body);
             return error;
         }
-    });
+    }).auth(username, password, false);
 }

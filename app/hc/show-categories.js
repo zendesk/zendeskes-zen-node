@@ -6,8 +6,9 @@ var password = '###';                                   // Replace with your pas
 var domain = '###.zendesk.com';                         // Replace with your Zendesk domain
 var path = '/api/v2/help_center/categories.json';
 var auth = username + ':' + password + '@';
-request.get('https://' + auth + domain + path, function (error, response, body) {
+
+request.get('https://' + domain + path, function(error, response, body) {
     if (!error && response.statusCode == 200) {
         console.log(body);
     }
-});
+}).auth(username,password, false);

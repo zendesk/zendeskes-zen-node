@@ -1,20 +1,19 @@
 // Create a single ticket using node.js
 
 var request = require('request');
-var username = 'epritchard@zendesk.com/token';                                   // Replace with your username
-var password = 'RVYy6UDNcUYxz3qQ1weQcDZ1pSyDpjeJd80X2IGb';                                   // Replace with your password
-var domain = 'z3nubiquity.zendesk.com';                         // Replace with your Zendesk domain
+var username = '####';                                   // Replace with your username
+var password = '####';                                   // Replace with your password
+var domain = '####.zendesk.com';                         // Replace with your Zendesk domain
 var path = '/api/v2/tickets.json';
-var auth = username + ':' + password + '@';
 
 
 // Ticket information
 
 var requester = {
-    name: 'John Malcolm',
-    email: 'epritchard83+jmalc@gmail.com',
-    subject: 'API Test 2',
-    body: 'Boom!'
+    name: '####',
+    email: '####',
+    subject: '####',
+    body: '####'
 };
 
 request({

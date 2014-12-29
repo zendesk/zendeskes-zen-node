@@ -1,5 +1,5 @@
 // Dependencies
-var fs = require('fs-extra');
+var fs = require('fs');
 var prompt = require('prompt');
 var request = require('request');
 var underscore = require('underscore');
@@ -11,7 +11,7 @@ prompt.delimiter = '';
 
 // Set global variables
 var page = 1;
-var organizations = [];
+var orgs = [];
 var orgCount = 0;
 
 // Get authentication properties and export filename
@@ -85,27 +85,24 @@ function getOrgs(credentials, subdomain, csvFile) {
             var data = JSON.parse(body);
 
             underscore._.each(data.organizations, function(value) {
-                organizations.push({"name":value.name, "id":value.id, "url":value.url});
-                orgCount++;
+                orgs.push({"name":value.name, "id":value.id, "url":value.url});
+                // orgCount++;
             });
 
             if (data.next_page !== null) {
                 page++;
                 setTimeout(getOrgs(credentials, subdomain, csvFile), 2000);
             } else {
-                console.log("Done fetching pages...\n");
-                console.log("RESULTS - Showing " + orgCount + " organizations");
-                console.log("=====================================================\n\n");
-                console.log(JSON.stringify(organizations));
-                var csvContent = json2csv.convert(organizations);
+                var csvContent = json2csv.convert(orgs);
 
-                console.log("CSV VALUES");
+                console.log("Done fetching pages...\n");
+                console.log("RESULTS - Showing " + orgs.length + " organizations");
                 console.log("=====================================================\n\n");
                 console.log(csvContent);
-                fs.writeFile(csvFile, csvContent, function (err){
+                /*fs.writeFile(csvFile, csvContent, function (err){
                     if (err) return console.log(err);
                     console.log("Saved CSV...");
-                });
+                });*/
             }
 
         } else if (response.statusCode == 429) {

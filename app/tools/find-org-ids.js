@@ -10,6 +10,7 @@ prompt.message = '> '.green;
 prompt.delimiter = '';
 
 // Set global variables
+var csvFile = __dirname + '/data-sets/tmp/';
 var page = 1;
 var retry = 1000;
 var orgs = [];
@@ -53,9 +54,6 @@ prompt.get(authProperties, function (err, result) {
         return onErr(err);
     } else {
 
-        // Check to see if exportFile exists, and if not create it
-        var csvFile = 'tmp/org-ids/' + result.exportFile + '.csv';
-
         // Create credentials from user input and pass on to getOrgs()
         var username = '';
 
@@ -64,6 +62,9 @@ prompt.get(authProperties, function (err, result) {
         } else {
             username = result.username + '/token';
         }
+
+        // Complete full CSV File path
+        csvFile += result.exportFile + '.csv';
 
         console.log("\n"); // Make space for request processing in console
         getOrgs(username, result.password, result.subdomain, csvFile);
@@ -104,10 +105,10 @@ function getOrgs(username, password, subdomain, csvFile) {
                     console.log("RESULTS - Showing " + orgs.length + " organizations");
                     console.log("==================================\n\n");
                     console.log(csvContent);
-                    /*fs.writeFile(csvFile, csvContent, function (err){
-                        if (err) return console.log(err);
+                    fs.writeFile(csvFile, csvContent, function (err){
+                        if (err) throw err;
                         console.log("Saved CSV...");
-                    });*/
+                    });
                 }
 
             } else if (response.statusCode == 429) {

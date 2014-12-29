@@ -11,6 +11,7 @@ prompt.delimiter = '';
 
 // Set global variables
 var page = 1;
+var retry = 1000;
 var orgs = [];
 
 // Get authentication properties and export filename
@@ -74,43 +75,52 @@ function onErr(err) {
     console.log("There was a problem.\n", err);
 }
 
-
-
 function getOrgs(username, password, subdomain, csvFile) {
-    console.log("Getting page " + page + "...");
 
-    request.get('https://' + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var data = JSON.parse(body);
+    // Set a timeout to control rate of API requests
+    setTimeout(function() {
 
-            underscore._.each(data.organizations, function(value) {
-                orgs.push({"name":value.name, "id":value.id, "url":value.url});
-            });
+        // Print the page number that we are requesting
+        console.log("Getting page " + page + "...");
 
-            if (data.next_page !== null) {
-                page++;
-                setTimeout(getOrgs(username, password, subdomain, csvFile), 2000);
+        request.get('https://' + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+
+                // Set retry interval back to normal if it was changed from rate limiting
+                retry = 1000;
+                var data = JSON.parse(body);
+
+                underscore._.each(data.organizations, function(value) {
+                    orgs.push({"name":value.name, "id":value.id, "url":value.url});
+                });
+
+                if (data.next_page !== null) {
+                    page++;
+                    getOrgs(username, password, subdomain, csvFile);
+                } else {
+                    var csvContent = json2csv.convert(orgs);
+
+                    console.log("Done fetching pages.\n");
+                    console.log("RESULTS - Showing " + orgs.length + " organizations");
+                    console.log("==================================\n\n");
+                    console.log(csvContent);
+                    /*fs.writeFile(csvFile, csvContent, function (err){
+                        if (err) return console.log(err);
+                        console.log("Saved CSV...");
+                    });*/
+                }
+
+            } else if (response.statusCode == 429) {
+                // Modify retry interval according to response
+                retry = response["Retry-After"];
+                getOrgs(username, password, subdomain, csvFile);
             } else {
-                var csvContent = json2csv.convert(orgs);
-
-                console.log("Done fetching pages.\n");
-                console.log("RESULTS - Showing " + orgs.length + " organizations");
-                console.log("==================================\n\n");
-                console.log(csvContent);
-                /*fs.writeFile(csvFile, csvContent, function (err){
-                    if (err) return console.log(err);
-                    console.log("Saved CSV...");
-                });*/
+                console.log(response.statusCode);
+                console.log(response.body);
+                return error;
             }
+        }).auth(username, password, false);
 
-        } else if (response.statusCode == 429) {
-            setTimeout(getOrgs(credentials, subdomain, csvFile), response["Retry-After"]);
-            getOrgs(credentials, result.subdomain, csvFile);
+    }, retry);
 
-        } else {
-            console.log(response.statusCode);
-            console.log(response.body);
-            return error;
-        }
-    }).auth(username, password, false);
 }

@@ -11,15 +11,10 @@
     "url": "https://github.com/epritchard"
   },
   "dependencies": {
-    "bottleneck": "^1.5.3",
     "csvtojson": "^0.3.17",
-    "fs-extra": "^0.13.0",
-    "lazy": "^1.0.11",
-    "mkpath": "^0.1.0",
     "nice-json2csv": "^0.2.0",
     "prompt": "^0.2.14",
     "request": "^2.51.0",
-    "touch": "0.0.3",
     "underscore": "^1.7.0"
   },
   "devDependencies": {},

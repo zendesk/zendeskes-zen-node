@@ -4,6 +4,7 @@ var prompt = require('prompt');
 var request = require('request');
 var underscore = require('underscore');
 var json2csv = require('nice-json2csv');
+var ProgressBar = require('progress');
 
 // Set prompt appearance
 prompt.message = '> '.green;
@@ -12,8 +13,10 @@ prompt.delimiter = '';
 // Set global variables
 var csvFile = __dirname + '/data-sets/tmp/';
 var page = 1;
-var retry = 1000;
+var defaultRetry = 0;
+var retry = defaultRetry;
 var orgs = [];
+var bar;
 
 // Get authentication properties and export filename
 var authProperties = [
@@ -82,18 +85,33 @@ function getOrgs(username, password, subdomain, csvFile) {
     setTimeout(function() {
 
         // Print the page number that we are requesting
-        console.log("Getting page " + page + "...");
+        // console.log("Getting page " + page + "..." );
 
         request.get('https://' + subdomain + '.zendesk.com/api/v2/organizations.json?page=' + page, function (error, response, body) {
             if (!error && response.statusCode == 200) {
 
                 // Set retry interval back to normal if it was changed from rate limiting
-                retry = 1000;
+                retry = defaultRetry;
+
+                // Parse the data
                 var data = JSON.parse(body);
+
+                // Create the progress bar if page < 2
+                if (page === 1) {
+                    bar = new ProgressBar('Download Progress [:bar] :percent', {
+                        complete: '=',
+                        incomplete: ' ',
+                        width: 50,
+                        total: data.count
+                    });
+                }
 
                 underscore._.each(data.organizations, function(value) {
                     orgs.push({"name":value.name, "id":value.id, "url":value.url});
                 });
+
+                // Update download progress bar
+                bar.tick(orgs.length);
 
                 if (data.next_page !== null) {
                     page++;
@@ -101,13 +119,10 @@ function getOrgs(username, password, subdomain, csvFile) {
                 } else {
                     var csvContent = json2csv.convert(orgs);
 
-                    console.log("Done fetching pages.\n");
-                    console.log("RESULTS - Showing " + orgs.length + " organizations");
-                    console.log("==================================\n\n");
-                    console.log(csvContent);
+                    console.log("Done fetching data.\n");
                     fs.writeFile(csvFile, csvContent, function (err){
                         if (err) throw err;
-                        console.log("Saved CSV...");
+                        console.log("Saved " + orgs.length + " organizations to " + csvFile);
                     });
                 }
 

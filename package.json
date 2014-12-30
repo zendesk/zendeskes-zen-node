@@ -13,6 +13,7 @@
   "dependencies": {
     "csvtojson": "^0.3.17",
     "nice-json2csv": "^0.2.0",
+    "progress": "^1.1.8",
     "prompt": "^0.2.14",
     "request": "^2.51.0",
     "underscore": "^1.7.0"

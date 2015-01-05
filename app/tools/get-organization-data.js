@@ -64,7 +64,7 @@ prompt.get(authProperties, function(err, result) {
         csvFile += result.exportFile + '.csv';
 
         // Make space for request processing in console
-        console.log("\n");
+        process.stdout.write("\n");
 
         // Begin fetching data
         getOrgs(username, result.password, result.subdomain, csvFile);
@@ -73,8 +73,9 @@ prompt.get(authProperties, function(err, result) {
 });
 
 function onErr(err) {
-    console.log("There was a problem.\n", err);
+    process.stdout.write("There was a problem.\n", err);
 }
+
 
 // Data fetching function
 function getOrgs(username, password, subdomain, csvFile) {
@@ -105,23 +106,42 @@ function getOrgs(username, password, subdomain, csvFile) {
                 // Update progress bar
                 bar.tick(data.organizations.length);
 
-                console.log(data.organizations[1]);
-
                 // Push the response data into the organization array
                 underscore._.each(data.organizations, function(value) {
+
+                    // Expand tag and domain objects
+                    var tags = '',
+                        domains = '';
+
+                    for (var a=0; a < value.tags.length; a++) {
+                        if (a < value.tags.length - 1) {
+                        tags += value.tags[a] + ', ';
+                        } else {
+                            tags += value.tags[a];
+                        }
+                    }
+
+                    for (var b=0; b < value.domain_names.length; b++) {
+                        if (b < value.domain_names.length - 1) {
+                            domains += value.domain_names[b] + ', ';
+                        } else {
+                            domains += value.domain_names[b];
+                        }
+                    }
+
                     orgs.push({
                         "id": value.id,
                         "name": value.name,
                         "created": value.created_at,
                         "updated": value.updated_at,
                         "external id": value.external_id,
-                        "shared": value.shared,
+                        "shared tickets": value.shared_tickets,
                         "shared comments": value.shared_comments,
-                        "domains": value.domain_names,
+                        "domains": domains,
                         "details": value.details,
                         "notes": value.notes,
                         "default group": value.group_id,
-                        "tags": value.tags,
+                        "tags": tags,
                         "url": value.url
                     });
 
@@ -135,12 +155,12 @@ function getOrgs(username, password, subdomain, csvFile) {
                 } else {
                     var csvContent = json2csv.convert(orgs);
 
-                    console.log("Done fetching data.\n");
+                    process.stdout.write("Download complete.\n");
                     fs.writeFile(csvFile, csvContent, function(err) {
                         if (err) throw err;
 
                         // Print the number of organizations pulled from the download
-                        console.log("Saved " + orgs.length + " organizations to " + csvFile);
+                        process.stdout.write("Saved " + orgs.length + " organizations to " + csvFile);
                     });
                 }
 
@@ -153,8 +173,8 @@ function getOrgs(username, password, subdomain, csvFile) {
             } else {
 
                 // If there was a problem with the request, print the status and response body
-                console.log(response.statusCode);
-                console.log(response.body);
+                process.stdout.write(response.statusCode);
+                process.stdout.write(response.body);
                 return error;
 
             }

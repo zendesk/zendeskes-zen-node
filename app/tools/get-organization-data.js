@@ -105,11 +105,23 @@ function getOrgs(username, password, subdomain, csvFile) {
                 // Update progress bar
                 bar.tick(data.organizations.length);
 
+                console.log(data.organizations[1]);
+
                 // Push the response data into the organization array
                 underscore._.each(data.organizations, function(value) {
                     orgs.push({
-                        "name": value.name,
                         "id": value.id,
+                        "name": value.name,
+                        "created": value.created_at,
+                        "updated": value.updated_at,
+                        "external id": value.external_id,
+                        "shared": value.shared,
+                        "shared comments": value.shared_comments,
+                        "domains": value.domain_names,
+                        "details": value.details,
+                        "notes": value.notes,
+                        "default group": value.group_id,
+                        "tags": value.tags,
                         "url": value.url
                     });
 

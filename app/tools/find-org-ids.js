@@ -11,12 +11,12 @@ prompt.message = '> '.green;
 prompt.delimiter = '';
 
 // Set global variables
-var csvFile = __dirname + '/data-sets/tmp/';
-var page = 1;
-var defRetry = 2000;
-var retryInterval = defRetry;
-var bar;
-var orgs = [];
+var csvFile = __dirname + '/data-sets/tmp/',
+    page = 1,
+    defRetry = 2000,
+    retryInterval = defRetry,
+    bar,
+    orgs = [];
 
 // Define authentication values and export filename
 var authProperties = [{
@@ -94,15 +94,16 @@ function getOrgs(username, password, subdomain, csvFile) {
                 // Parse the data
                 var data = JSON.parse(body);
 
-                // Create the progress bar if page === 1
-                if (page === 1) {
-                    bar = new ProgressBar('Download Progress [:bar] :percent', {
-                        complete: '=',
-                        incomplete: ' ',
-                        width: 50,
-                        total: data.count
-                    });
-                }
+                // Create or update progress bar
+                bar = bar || new ProgressBar('Downloading organizations: [:bar] :percent (approximately :etas remaining)', {
+                    complete: '=',
+                    incomplete: ' ',
+                    width: 50,
+                    total: data.count
+                });
+
+                // Update progress bar
+                bar.tick(data.organizations.length);
 
                 // Push the response data into the organization array
                 underscore._.each(data.organizations, function(value) {
@@ -111,10 +112,9 @@ function getOrgs(username, password, subdomain, csvFile) {
                         "id": value.id,
                         "url": value.url
                     });
-                });
 
-                // Update the download progress bar
-                bar.tick(orgs.length);
+
+                });
 
                 // If there is another page, request it, otherwise we're done fetching data and can save it to CSV
                 if (data.next_page !== null) {

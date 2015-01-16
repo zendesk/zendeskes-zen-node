@@ -70,7 +70,8 @@ prompt.get(authProperties, function(err, result) {
 
 // Default error
 var onErr = function(err) {
-    process.stdout.write("There was a problem.\n", err);
+    process.stdout.write("There was a problem:\n", err, "\n\n");
+    process.exit(1);
 };
 
 // Build the requests to get the pages of organization data
@@ -95,11 +96,6 @@ var getOrgs = function(username, password, nextPage, csvFile) {
         function (err, resp, body){
             if (err) {
                 throw new Error(err);
-            } else if (resp.statusCode == 429) {
-                // Rate limited... try the same request again after the timeout
-                setTimeout(getOrgs(username, password, nextPage, csvFile), response.headers["retry-after"]);
-            } else if (resp.statusCode == 401 || resp.statusCode == 501 || resp.statusCode == 504) {
-                throw new Error(resp.headers.status);
             } else if (resp.statusCode == 200 || resp.statusCode == 201) {
 
                 // Open CSV write stream if it isn't already open
@@ -142,6 +138,13 @@ var getOrgs = function(username, password, nextPage, csvFile) {
 
 
                 requestBuilder(username, password, data.next_page, csvFile);
+            } else if (resp.statusCode == 429) {
+                // Rate limited... try the same request again after the timeout
+                setTimeout(getOrgs(username, password, nextPage, csvFile), response.headers["retry-after"]);
+            } else {
+                // Something else went wrong, exit the program with status response headers
+                process.stdout.write(resp.headers.status + "\n\n");
+                process.exit(1);
             }
         }).auth(username, password, true);
     });

@@ -11,14 +11,12 @@
     "url": "https://github.com/epritchard"
   },
   "dependencies": {
-    "csvtojson": "^0.3.17",
     "fast-csv": "^0.5.4",
     "limiter": "^1.0.5",
-    "nice-json2csv": "^0.2.0",
     "progress": "^1.1.8",
     "prompt": "^0.2.14",
     "request": "^2.51.0",
-    "underscore": "^1.7.0"
+    "underscore-node": "^0.1.2"
   },
   "devDependencies": {},
   "peerDependencies": {}

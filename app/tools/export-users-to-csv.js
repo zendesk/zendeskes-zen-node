@@ -118,11 +118,11 @@ var getUsers = function(username, password, nextPage, csvFile) {
                 // Push the response data into the users array
                 var userFields = [];
 
-                underscore._.each(data.users, function(user) {
+                _.each(data.users, function(user) {
 
                     // Flatten the user_fields into columns
-                    userFields = underscore._.pairs(user.user_fields);
-                    underscore._.each(userFields, function(value){
+                    userFields = _.pairs(user.user_fields);
+                    _.each(userFields, function(value){
                         user['custom_' + value[0]] = value[1];
                     });
 

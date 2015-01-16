@@ -4,6 +4,7 @@ var fs = require('fs'),
     request = require('request'),
     csv = require("fast-csv"),
     underscore = require('underscore'),
+    _ = require('underscore-node'),
     ProgressBar = require('progress'),
     RateLimiter = require('limiter').RateLimiter;
 
@@ -118,11 +119,11 @@ var getOrgs = function(username, password, nextPage, csvFile) {
                 // Push the response data into the organizations array
                 var orgFields = [];
 
-                underscore._.each(data.organizations, function(organization) {
+                _.each(data.organizations, function(organization) {
 
                     // Flatten the organization_fields into columns
-                    orgFields = underscore._.pairs(organization.organization_fields);
-                    underscore._.each(orgFields, function(value){
+                    orgFields = _.pairs(organization.organization_fields);
+                    _.each(orgFields, function(value){
                         organization['custom_' + value[0]] = value[1];
                     });
 

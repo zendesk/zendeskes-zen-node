@@ -9,7 +9,7 @@ var fs = require('fs'),
 
 // Define global variables
 var bar,
-    limiter = new RateLimiter(1, 200),
+    limiter = new RateLimiter(1, 500),
     csvStream = csv.format({headers: true, quote: '\"'}),
     writableStream;
 
@@ -125,7 +125,7 @@ var getUsers = function(username, password, nextPage, csvFile) {
 
                 underscore._.each(data.users, function(user) {
 
-                    // Flattend the user_fields into columns
+                    // Flattened the user_fields into columns
                     userFields = underscore._.pairs(user.user_fields);
                     underscore._.each(userFields, function(value){
                         user[value[0]] = value[1];

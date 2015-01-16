@@ -78,7 +78,7 @@ var requestBuilder = function(username, password, nextPage, csvFile) {
 
     if (nextPage === null) {
         csvStream.end();
-        process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/data-sets/output/\n\n\n');
+        process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/data-sets/output/' + csvFile + '.csv\n\n\n');
     } else {
         getUsers(username, password, nextPage, csvFile);
     }
@@ -120,18 +120,17 @@ var getUsers = function(username, password, nextPage, csvFile) {
                 });
 
                 // Push the response data into the users array
-                var userFields = [],
-                    fieldKey, fieldValue;
+                var userFields = [];
 
                 underscore._.each(data.users, function(user) {
 
-                    // Flattened the user_fields into columns
+                    // Flatten the user_fields into columns
                     userFields = underscore._.pairs(user.user_fields);
                     underscore._.each(userFields, function(value){
-                        user[value[0]] = value[1];
+                        user['custom_' + value[0]] = value[1];
                     });
 
-                    // Remove the user_fields sub-object, since we flattended it
+                    // Remove the user_fields sub-object, since we flattened it
                     delete user.user_fields;
 
                     // Write the row to the CSV

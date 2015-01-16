@@ -99,11 +99,7 @@ var createOrganization = function(user, pass, subdomain, data, totalOrgs) {
             if (err) {
                 process.stdout.write("There was a problem.");
                 return false;
-            } else if (resp.statusCode == 429) {
-                setTimeout(createOrganization(user, pass, subdomain, data, totalOrgs), response.headers["retry-after"]);
-            } else if (resp.statusCode == 401 || resp.statusCode == 501 || resp.statusCode == 504) {
-                throw new Error(resp.headers.status);
-            } else if (resp.statusCode == 200 || resp.statusCode == 201) {
+            }  else if (resp.statusCode == 200 || resp.statusCode == 201) {
                 bar = bar || new ProgressBar('Progress: [:bar] :percent (approximately :etas remaining)', {
                     complete: '=',
                     incomplete: ' ',
@@ -113,6 +109,13 @@ var createOrganization = function(user, pass, subdomain, data, totalOrgs) {
 
                 // Update progress bar
                 bar.tick(1);
+
+            } else if (resp.statusCode == 429) {
+                setTimeout(createOrganization(user, pass, subdomain, data, totalOrgs), response.headers["retry-after"]);
+            } else {
+                // Something else went wrong, exit the program with status response headers
+                process.stdout.write(resp.headers.status + "\n\n");
+                process.exit(1);
             }
         }).auth(user, pass);
     });

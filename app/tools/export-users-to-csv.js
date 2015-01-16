@@ -59,15 +59,11 @@ prompt.get(authProperties, function(err, result) {
             username = result.username + '/token';
         }
 
-        // Open CSV write stream
-        writableStream = fs.createWriteStream(__dirname + '/data-sets/output/' + result.exportFile + '.csv');
-        csvStream.pipe(writableStream);
-
         // Make space for request processing in console
         process.stdout.write("\n");
 
         // Begin fetching data
-        requestBuilder(username, result.password, 'https://' + result.subdomain + '.zendesk.com/api/v2/users.json');
+        requestBuilder(username, result.password, 'https://' + result.subdomain + '.zendesk.com/api/v2/users.json', result.exportFile);
     }
 
 });
@@ -78,18 +74,18 @@ var onErr = function(err) {
 };
 
 // Build the requests to get the pages of user data
-var requestBuilder = function(username, password, nextPage) {
+var requestBuilder = function(username, password, nextPage, csvFile) {
 
     if (nextPage === null) {
         csvStream.end();
         process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/data-sets/output/\n\n\n');
     } else {
-        getUsers(username, password, nextPage);
+        getUsers(username, password, nextPage, csvFile);
     }
 };
 
 // Make the request to get a page of user data
-var getUsers = function(username, password, nextPage) {
+var getUsers = function(username, password, nextPage, csvFile) {
     limiter.removeTokens(1, function(err, remainingRequests){
         request(
         {
@@ -100,10 +96,17 @@ var getUsers = function(username, password, nextPage) {
             if (err) {
                 throw new Error(err);
             } else if (resp.statusCode == 429) {
-                setTimeout(getUsers(username, password, nextPage), response.headers["retry-after"]);
+                // Rate limited... try the same request again after the timeout
+                setTimeout(getUsers(username, password, nextPage, csvFile), response.headers["retry-after"]);
             } else if (resp.statusCode == 401 || resp.statusCode == 501 || resp.statusCode == 504) {
                 throw new Error(resp.headers.status);
             } else if (resp.statusCode == 200 || resp.statusCode == 201) {
+
+                // Open CSV write stream if it isn't already open
+                if (! writableStream) {
+                    writableStream = fs.createWriteStream(__dirname + '/data-sets/output/' + csvFile + '.csv');
+                    csvStream.pipe(writableStream);
+                }
 
                 // Parse the data
                 var data = JSON.parse(body);
@@ -139,7 +142,7 @@ var getUsers = function(username, password, nextPage) {
                 });
 
 
-                requestBuilder(username, password, data.next_page);
+                requestBuilder(username, password, data.next_page, csvFile);
             }
         }).auth(username, password, true);
     });

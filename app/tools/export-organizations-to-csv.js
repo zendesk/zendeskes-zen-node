@@ -3,8 +3,8 @@ var fs = require('fs'),
     prompt = require('prompt'),
     request = require('request'),
     csv = require("fast-csv"),
-    underscore = require('underscore'),
     _ = require('underscore-node'),
+    mkdirp = require('mkdirp'),
     ProgressBar = require('progress'),
     RateLimiter = require('limiter').RateLimiter;
 
@@ -63,8 +63,15 @@ prompt.get(authProperties, function(err, result) {
         // Make space for request processing in console
         process.stdout.write("\n");
 
-        // Begin fetching data
-        requestBuilder(username, result.password, 'https://' + result.subdomain + '.zendesk.com/api/v2/organizations.json', result.exportFile);
+        // Make output directory if it doesn't exist
+        mkdirp(__dirname + '/data-sets/output/', function (err) {
+            if (err) {
+                onErr(err);
+            } else {
+                // Begin fetching data
+                requestBuilder(username, result.password, 'https://' + result.subdomain + '.zendesk.com/api/v2/organizations.json', result.exportFile);
+            }
+        });
     }
 
 });

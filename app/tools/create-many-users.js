@@ -40,7 +40,18 @@ var authProperties = [{
     name: 'startingUser',
     description: 'Enter the index number to start at:'.green,
     required: false
-}];
+}, {
+    name: 'includeEmails',
+    description: 'Do you want to include email addresses for these users (y/n)?'.green,
+    required: true
+
+}, {
+    name: 'emailFormat',
+    description: 'What email address should be used for these users will be used?'.green,
+    required: false
+}
+
+];
 
 prompt.start();
 
@@ -62,7 +73,7 @@ prompt.get(authProperties, function(err, result) {
         process.stdout.write("\n");
 
         // Begin posting data
-        createUsers(username, result.password, result.subdomain, parseInt(result.totalUsers), parseInt(result.startingUser));
+        createUsers(username, result.password, result.subdomain, parseInt(result.totalUsers), parseInt(result.startingUser), result.includeEmails, result.emailFormat);
     }
 
 });
@@ -72,16 +83,24 @@ function onErr(err) {
 }
 
 // Create the users
-var createUsers = function (user, pass, subdomain, totalUsers, startingUser) {
+var createUsers = function (user, pass, subdomain, totalUsers, startingUser, includeEmails, emailFormat) {
 
-    var endingOrg = startingUser + totalUsers;
+    var endingUser = startingUser + totalUsers;
     process.stdout.write(totalUsers + " users will be created.\n\n" );
 
-    for (var i = startingUser; i < endingOrg; i++) {
+    if (includeEmails) {
+        var emailParts = emailFormat.split('@');
+        for (var e = startingUser; e < endingUser; e++) {
+            var dataE = {"user": {"name": "Sample User " + e, "email": emailParts[0] + "+su" + e + "@" + emailParts[1], "verified": true}};
+            createUser(user, pass, subdomain, dataE, totalUsers);
+        }
 
-        var data = {"user": {"name": "Sample User " + i}};
-        createUser(user, pass, subdomain, data, totalUsers);
+    } else {
+        for (var i = startingUser; i < endingUser; i++) {
 
+            var data = {"user": {"name": "Sample User " + i, "verified": true}};
+            createUser(user, pass, subdomain, data, totalUsers);
+        }
     }
 
 };

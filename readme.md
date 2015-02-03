@@ -5,6 +5,21 @@
 1. Run `npm install` to install dependencies
 
 
+## Commands
+
+Batch create sample organizations
+`$ node app/tools/create-many-orgs.js`
+
+Batch create sample users
+`$ node app/tools/create-many-users.js`
+
+Export organizations to CSV in app/tools/output directory
+`$ node app/tools/export-organizations-to-csv.js`
+
+Export users to CSV in app/tools/output directory
+`$ node app/tools/export-users-to-csv.js`
+
+
 ## Dependencies
 
 - [fast-csv](https://github.com/C2FO/fast-csv) (MIT)

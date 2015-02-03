@@ -47,7 +47,7 @@ var authProperties = [{
 
 }, {
     name: 'emailFormat',
-    description: 'What email address should be used for these users will be used?'.green,
+    description: 'What email address should be used for these users will be used (a Google address *must* be used)?'.green,
     required: false
 }
 

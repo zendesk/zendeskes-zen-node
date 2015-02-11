@@ -5,7 +5,7 @@ var prompt = require('prompt'),
     RateLimiter = require('limiter').RateLimiter;
 
 // Constructors
-var limiter = new RateLimiter(1, 200),
+var limiter = new RateLimiter(1, 500),
     bar;
 
 // Set prompt appearance

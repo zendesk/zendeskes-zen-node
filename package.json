@@ -14,6 +14,7 @@
     "fast-csv": "^0.5.4",
     "limiter": "^1.0.5",
     "mkdirp": "^0.5.0",
+    "node-zendesk": "^1.0.3",
     "progress": "^1.1.8",
     "prompt": "^0.2.14",
     "request": "^2.51.0",

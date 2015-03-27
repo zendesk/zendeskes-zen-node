@@ -41,4 +41,8 @@ client.articles.list(function (err, req, result) {
     return;
   }
   articles = result;
+  // Group Articles by section
+
+  var sectioned_articles = _.groupBy(articles, function(article){ return article.section_id; });
+  console.log(sectioned_articles);
 });

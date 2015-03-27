@@ -5,10 +5,9 @@ var client = zendesk.createClient({
   username:  'cherub.kumar@gmail.com',
   token:     'nkwVEwjouOmciP1uuchp86EqiOGPgLEaaZpQx8Qm',
   subdomain: 'wtp',
-  remoteUri: 'https://wtp.zendesk.com/api/v2/',
+  remoteUri: 'https://wtp.zendesk.com/api/v2/help_center',
   // disableGlobalState: true,
-  // debug: true,
-  helpcenter: true
+  // debug: true
 });
 
 client.categories.list(function (err, req, result) {

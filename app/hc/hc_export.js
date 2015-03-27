@@ -16,7 +16,7 @@ var client = zendesk.createClient({
 
 
 // Global Variables
-var categories, sections, articles;
+var categories, categorized_sections, sectioned_articles;
 
 // Fetch all Categories, Sections and Articles
 client.categories.list(function (err, req, result) {
@@ -25,6 +25,7 @@ client.categories.list(function (err, req, result) {
     return;
   }
   categories = result;
+  console.log('Categories',categories);
 });
 
 client.sections.list(function (err, req, result) {
@@ -32,7 +33,9 @@ client.sections.list(function (err, req, result) {
     console.log(err);
     return;
   }
-  sections = result;
+
+  categorized_sections = _.groupBy(result, function(section){ return section.category_id; });
+  console.log('Categorized sections:',categorized_sections);
 });
 
 client.articles.list(function (err, req, result) {
@@ -40,9 +43,8 @@ client.articles.list(function (err, req, result) {
     console.log(err);
     return;
   }
-  articles = result;
-  // Group Articles by section
 
-  var sectioned_articles = _.groupBy(articles, function(article){ return article.section_id; });
-  console.log(sectioned_articles);
+  // Group Articles by section
+  sectioned_articles = _.groupBy(result, function(article){ return article.section_id; });
+  console.log('sectioned_articles',sectioned_articles);
 });

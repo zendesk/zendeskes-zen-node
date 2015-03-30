@@ -28,6 +28,7 @@ Export users to CSV in app/tools/output directory
 - [prompt](https://github.com/flatiron/prompt) (MIT)
 - [request](https://github.com/request/request) (Apache 2.0)
 - [underscore-node](https://github.com/joonhocho/underscore-node) (MIT)
+- [thread-sleep](https://www.npmjs.com/package/thread-sleep) (MIT)
 
 ## Under Development
 

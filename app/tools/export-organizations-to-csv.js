@@ -6,13 +6,15 @@ var fs = require('fs'),
     _ = require('underscore-node'),
     mkdirp = require('mkdirp'),
     ProgressBar = require('progress'),
-    RateLimiter = require('limiter').RateLimiter;
+    RateLimiter = require('limiter').RateLimiter,
+    sleep = require('thread-sleep');
 
 // Define global variables
 var bar,
-    limiter = new RateLimiter(1, 500),
+    limiter = new RateLimiter(1, 10000),
     csvStream = csv.format({headers: true, quote: '\"'}),
-    writableStream;
+    writableStream,
+    totalCount;
 
 // Define prompt appearance
 prompt.message = '> '.green;
@@ -68,8 +70,24 @@ prompt.get(authProperties, function(err, result) {
             if (err) {
                 onErr(err);
             } else {
-                // Begin fetching data
-                requestBuilder(username, result.password, 'https://' + result.subdomain + '.zendesk.com/api/v2/organizations.json', result.exportFile);
+                // Fetch the total number of records for the progress bar
+                request({
+                    method: 'GET',
+                    uri: 'https://' + result.subdomain + '.zendesk.com/api/v2/organizations.json'
+                },
+                function (err, resp, body) {
+                    if (err) {
+                        throw new Error(err);
+                    } else if (resp.statusCode == 200 || resp.statusCode == 201) {
+                        var data = JSON.parse(body);
+                        totalCount = data.count;
+                    } else {
+                        process.stdout.write(resp.headers.status + "\n\n");
+                        process.exit(1);
+                    }
+                }).auth(username, result.password, true);
+                // Begin fetching data with start_time of 01-01-2000 00:00:00 GMT
+                requestBuilder(username, result.password, 'https://' + result.subdomain + '.zendesk.com/api/v2/incremental/organizations.json?start_time=946684800', result.exportFile);
             }
         });
     }
@@ -87,7 +105,7 @@ var requestBuilder = function(username, password, nextPage, csvFile) {
 
     if (nextPage === null) {
         csvStream.end();
-        process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/data-sets/output/' + csvFile + '.csv\n\n\n');
+        process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/data-sets/output/' + csvFile + '.csv\n\n');
     } else {
         getOrgs(username, password, nextPage, csvFile);
     }
@@ -116,11 +134,11 @@ var getOrgs = function(username, password, nextPage, csvFile) {
                 var data = JSON.parse(body);
 
                 // Create the progress bar if there wasn't one
-                bar = bar || new ProgressBar('Progress: [:bar] :percent (approximately :etas remaining)', {
+                bar = bar || new ProgressBar('Progress: [:bar] :percent (~:etas remaining)', {
                     complete: '=',
                     incomplete: ' ',
                     width: 50,
-                    total: data.count
+                    total: totalCount
                 });
 
                 // Push the response data into the organizations array
@@ -144,11 +162,16 @@ var getOrgs = function(username, password, nextPage, csvFile) {
                     bar.tick(1);
                 });
 
-
-                requestBuilder(username, password, data.next_page, csvFile);
+                if (data.count === 1000) {
+                    requestBuilder(username, password, data.next_page, csvFile);
+                } else {
+                    requestBuilder(username, password, null, csvFile);
+                }
             } else if (resp.statusCode == 429) {
                 // Rate limited... try the same request again after the timeout
-                setTimeout(getOrgs(username, password, nextPage, csvFile), response.headers["retry-after"]);
+                console.log("Rate limited... resuming in " + resp.headers["retry-after"] + " seconds.");
+                sleep(resp.headers["retry-after"]*1000);
+                getOrgs(username, password, nextPage, csvFile);
             } else {
                 // Something else went wrong, exit the program with status response headers
                 process.stdout.write(resp.headers.status + "\n\n");

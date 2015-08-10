@@ -17,6 +17,7 @@
     "progress": "^1.1.8",
     "prompt": "^0.2.14",
     "request": "^2.51.0",
+    "thread-sleep": "^1.0.3",
     "underscore-node": "^0.1.2"
   },
   "devDependencies": {},

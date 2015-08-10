@@ -66,7 +66,7 @@ prompt.get(authProperties, function(err, result) {
         process.stdout.write("\n");
 
         // Make output directory if it doesn't exist
-        mkdirp(__dirname + '/data-sets/output/', function (err) {
+        mkdirp(__dirname + '/exports/', function (err) {
             if (err) {
                 onErr(err);
             } else {
@@ -105,7 +105,7 @@ var requestBuilder = function(username, password, nextPage, csvFile) {
 
     if (nextPage === null) {
         csvStream.end();
-        process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/data-sets/output/' + csvFile + '.csv\n\n');
+        process.stdout.write("\nThe CSV has been successfully saved to " + __dirname + '/exports/' + csvFile + '.csv\n\n');
     } else {
         getOrgs(username, password, nextPage, csvFile);
     }
@@ -126,7 +126,7 @@ var getOrgs = function(username, password, nextPage, csvFile) {
 
                 // Open CSV write stream if it isn't already open
                 if (! writableStream) {
-                    writableStream = fs.createWriteStream(__dirname + '/data-sets/output/' + csvFile + '.csv');
+                    writableStream = fs.createWriteStream(__dirname + '/exports/' + csvFile + '.csv');
                     csvStream.pipe(writableStream);
                 }
 

@@ -15,7 +15,7 @@
     "limiter": "^1.0.5",
     "mkdirp": "^0.5.0",
     "progress": "^1.1.8",
-    "prompt": "^0.2.14",
+    "prompt": "^0.3.0",
     "request": "^2.51.0",
     "thread-sleep": "^1.0.3",
     "underscore-node": "^0.1.2"
